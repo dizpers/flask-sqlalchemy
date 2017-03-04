@@ -369,6 +369,42 @@ class TablenameTestCase(unittest.TestCase):
 
         self.assertTrue(ns.accessed)
 
+    def test_single_table_inheritance(self):
+        app = flask.Flask(__name__)
+        db = fsa.SQLAlchemy(app)
+
+        class Bird(db.Model):
+            __tablename__ = 'bird'
+
+            id = db.Column(db.Integer, primary_key=True)
+            type = db.Column(db.String())
+
+            __mapper_args__ = {
+                'polymorphic_on': type
+            }
+
+        class Duck(Bird):
+            __mapper_args__ = {
+                'polymorphic_identity': 'duck'
+            }
+
+        class Sparrow(Bird):
+            __mapper_args__ = {
+                'polymorphic_identity': 'sparrow'
+            }
+
+        class Owl(Bird):
+            __mapper_args__ = {
+                'polymorphic_identity': 'owl'
+            }
+
+        self.assertIsNone(Duck.__tablename__)
+        self.assertIsNone(Duck.__table__)
+        self.assertIsNone(Sparrow.__tablename__)
+        self.assertIsNone(Sparrow.__table__)
+        self.assertIsNone(Owl.__tablename__)
+        self.assertIsNone(Owl.__table__)
+
 
 class PaginationTestCase(unittest.TestCase):
     def test_basic_pagination(self):
